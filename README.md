@@ -426,14 +426,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-## 📞 Support
-
-- **Issues:** [GitHub Issues](https://github.com/your-repo/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/your-repo/discussions)
-- **Email:** support@example.com
-
----
-
 ## 🗺️ Roadmap
 
 - [ ] Integration with dbt for transformation testing
