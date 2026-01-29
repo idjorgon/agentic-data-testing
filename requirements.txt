@@ -1,0 +1,26 @@
+# Core Dependencies
+langchain>=0.1.0
+langchain-openai>=0.0.2
+openai>=1.0.0
+pydantic>=2.0.0
+
+# Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Validation & Testing
+great-expectations>=0.18.0
+jsonschema>=4.17.0
+pytest>=7.4.0
+pytest-cov>=4.1.0
+
+# Data Generation
+faker>=19.0.0
+
+# Utilities
+python-dotenv>=1.0.0
+pyyaml>=6.0
+
+# Optional: Advanced features
+# dbt-core>=1.6.0  # For dbt integration
+# apache-airflow>=2.7.0  # For Airflow integration
