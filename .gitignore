@@ -26,6 +26,16 @@ ENV/
 env/
 .venv
 
+# Environment Variables & Secrets (CRITICAL - Never commit these!)
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+secrets/
+credentials/
+.secrets
+
 # IDE
 .vscode/
 .idea/
