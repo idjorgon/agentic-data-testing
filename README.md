@@ -35,6 +35,154 @@ The AI Agentic Data Testing Framework is an intelligent, AI-powered solution tha
 
 ## 🏗️ Architecture
 
+### System Architecture Diagram
+
+```mermaid
+graph TB
+    subgraph "User Interface Layer"
+        USER[👤 User/Developer]
+        CHAT[💬 Chat Interface]
+        CLI[⌨️ CLI/Scripts]
+    end
+    
+    subgraph "Orchestration Layer"
+        ORCH[🎯 Orchestrator Agent]
+    end
+    
+    subgraph "AI Agent Layer"
+        TESTGEN[🤖 Test Generator Agent<br/>- Analyze schemas<br/>- Generate test cases<br/>- Create synthetic data]
+        VALID[✅ Validation Agent<br/>- Schema compliance<br/>- Business rules<br/>- Regression testing]
+        PROFILER[📊 Data Profiler<br/>- Column profiling<br/>- Anomaly detection<br/>- Drift detection]
+    end
+    
+    subgraph "Core Processing Layer"
+        SCHEMA[📋 Schema Analyzer]
+        TESTCASE[🔨 Test Case Generator]
+        ENGINE[⚙️ Validation Engine]
+    end
+    
+    subgraph "Data & Storage Layer"
+        DATASETS[(📁 Sample Datasets)]
+        SCHEMAS[(📄 Schemas)]
+        REPORTS[(📊 Reports)]
+        BASELINE[(💾 Baseline Profiles)]
+    end
+    
+    subgraph "External Services"
+        GPT4[🧠 OpenAI GPT-4]
+    end
+    
+    subgraph "Utilities"
+        LOGGER[📝 Logger]
+        DATAUTILS[🔧 Data Utils<br/>- Secure file ops<br/>- Path validation]
+        REPORTGEN[📄 Report Generator<br/>- HTML/MD/JSON]
+    end
+    
+    %% User interactions
+    USER -->|Natural Language| CHAT
+    USER -->|Execute| CLI
+    CHAT --> ORCH
+    CLI --> ORCH
+    
+    %% Orchestrator coordinates agents
+    ORCH -->|Plan & Execute| TESTGEN
+    ORCH -->|Validate| VALID
+    ORCH -->|Profile First| PROFILER
+    
+    %% Agent interactions with core
+    TESTGEN --> SCHEMA
+    TESTGEN --> TESTCASE
+    VALID --> ENGINE
+    PROFILER -->|Statistical Analysis| DATASETS
+    
+    %% Core processing
+    SCHEMA --> SCHEMAS
+    TESTCASE --> DATASETS
+    ENGINE --> DATASETS
+    
+    %% AI Integration
+    TESTGEN -.->|API Calls| GPT4
+    VALID -.->|API Calls| GPT4
+    ORCH -.->|Chat| GPT4
+    
+    %% Data flow
+    PROFILER --> BASELINE
+    PROFILER -->|Anomalies| REPORTGEN
+    ENGINE -->|Results| REPORTGEN
+    REPORTGEN --> REPORTS
+    
+    %% Utilities usage
+    PROFILER --> LOGGER
+    TESTGEN --> LOGGER
+    VALID --> LOGGER
+    ORCH --> DATAUTILS
+    PROFILER --> DATAUTILS
+    
+    %% Styling
+    classDef agentClass fill:#4CAF50,stroke:#2E7D32,color:#fff
+    classDef coreClass fill:#2196F3,stroke:#1565C0,color:#fff
+    classDef dataClass fill:#FF9800,stroke:#E65100,color:#fff
+    classDef utilClass fill:#9E9E9E,stroke:#424242,color:#fff
+    classDef extClass fill:#9C27B0,stroke:#6A1B9A,color:#fff
+    
+    class TESTGEN,VALID,PROFILER,ORCH agentClass
+    class SCHEMA,TESTCASE,ENGINE coreClass
+    class DATASETS,SCHEMAS,REPORTS,BASELINE dataClass
+    class LOGGER,DATAUTILS,REPORTGEN utilClass
+    class GPT4 extClass
+```
+
+### Agentic Workflow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Orchestrator
+    participant Profiler
+    participant TestGen as Test Generator
+    participant Validator
+    participant GPT4 as OpenAI GPT-4
+    participant Reports
+    
+    User->>Orchestrator: Submit schema + data + business rules
+    
+    Note over Orchestrator: Step 1: Data Profiling
+    Orchestrator->>Profiler: Profile dataset
+    Profiler->>Profiler: Analyze columns (types, nulls, distributions)
+    Profiler->>Profiler: Detect anomalies (IQR/Z-score)
+    Profiler->>Profiler: Check for drift vs baseline
+    Profiler-->>Orchestrator: Profile results + anomalies
+    
+    Note over Orchestrator: Step 2: Test Generation (Optional)
+    Orchestrator->>TestGen: Analyze schema
+    TestGen->>GPT4: Request schema analysis
+    GPT4-->>TestGen: Analysis & insights
+    TestGen->>GPT4: Generate test cases
+    GPT4-->>TestGen: Comprehensive test suite
+    TestGen-->>Orchestrator: Test cases + synthetic data
+    
+    Note over Orchestrator: Step 3: Validation
+    Orchestrator->>Validator: Validate data
+    Validator->>Validator: Check schema compliance
+    Validator->>Validator: Validate business rules
+    Validator->>GPT4: Request AI-powered validation
+    GPT4-->>Validator: Validation insights
+    Validator-->>Orchestrator: Validation results
+    
+    Note over Orchestrator: Step 4: Reporting
+    Orchestrator->>Reports: Generate reports
+    Reports->>Reports: Create HTML report
+    Reports->>Reports: Create Markdown report
+    Reports->>Reports: Create JSON report
+    Reports-->>Orchestrator: Report files
+    
+    Orchestrator-->>User: Complete results + recommendations
+    
+    Note over User: Review findings:<br/>- Anomalies detected<br/>- Data quality issues<br/>- Validation status<br/>- Recommendations
+```
+
+### Project Structure
+
 ```
 agentic-data-testing/
 ├── src/
@@ -45,7 +193,8 @@ agentic-data-testing/
 │   ├── core/                      # Core testing engine
 │   │   ├── schema_analyzer.py         # Schema analysis & insights
 │   │   ├── test_case_generator.py     # Test data generation
-│   │   └── validation_engine.py       # Validation execution
+│   │   ├── validation_engine.py       # Validation execution
+│   │   └── data_profiler.py           # 🆕 Data profiling & drift detection
 │   ├── utils/                     # Utilities
 │   │   ├── logger.py
 │   │   ├── data_utils.py
