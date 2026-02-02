@@ -2,6 +2,7 @@
 Sample unit tests for the Schema Analyzer
 """
 
+import copy
 import pytest
 from src.core.schema_analyzer import SchemaAnalyzer
 
@@ -96,8 +97,8 @@ def test_compare_schemas(sample_schema):
     """Test schema comparison"""
     analyzer = SchemaAnalyzer()
     
-    # Create a modified schema
-    modified_schema = sample_schema.copy()
+    # Create a modified schema (deep copy to avoid modifying the original)
+    modified_schema = copy.deepcopy(sample_schema)
     modified_schema["properties"]["new_field"] = {"type": "string"}
     
     comparison = analyzer.compare_schemas(sample_schema, modified_schema)
