@@ -137,6 +137,8 @@ graph TB
     class DATASETS,SCHEMAS,REPORTS,BASELINE dataClass
     class LOGGER,DATAUTILS,REPORTGEN utilClass
     class GPT4 extClass
+```
+
 ### Agentic Workflow
 
 ```mermaid
@@ -199,8 +201,22 @@ sequenceDiagram
     
     Note over User: Review findings:<br/>- Anomalies detected<br/>- Data quality issues<br/>- Validation status<br/>- Monitoring alerts<br/>- Recommendations
 ```
+
+### Project Structure
+
+```
+agentic-data-testing/
+├── src/
+│   ├── agents/                    # AI Agent implementations
+│   │   ├── test_generator_agent.py    # Generates test cases
+│   │   ├── validation_agent.py        # Validates data & pipelines
+│   │   ├── orchestrator_agent.py      # Coordinates workflows
+│   │   └── monitoring_agent.py        # 🆕 Continuous monitoring & alerting
+│   ├── core/                      # Core testing engine
+│   │   ├── schema_analyzer.py         # Schema analysis & insights
+│   │   ├── test_case_generator.py     # Test data generation
 │   │   ├── validation_engine.py       # Validation execution
-│   │   └── data_profiler.py           # 🆕 Data profiling & drift detection
+│   │   └── data_profiler.py           # Data profiling & drift detection
 │   ├── utils/                     # Utilities
 │   │   ├── logger.py
 │   │   ├── data_utils.py
@@ -211,6 +227,9 @@ sequenceDiagram
 │   ├── sample_datasets/
 │   ├── sample_schemas/
 │   └── demo_pipelines/
+│       ├── chat_demo.py
+│       ├── financial_validation_demo.py
+│       └── monitoring_demo.py         # 🆕 Monitoring simulation
 ├── tests/                         # Unit tests
 ├── docs/                          # Documentation
 ├── requirements.txt
