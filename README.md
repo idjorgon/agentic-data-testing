@@ -88,6 +88,7 @@ graph TB
     %% Orchestrator coordinates agents
     ORCH -->|Plan & Execute| TESTGEN
     ORCH -->|Validate| VALID
+    ORCH -->|Profile First| PROFILER
     ORCH -->|Track & Alert| MONITOR
     
     %% Agent interactions with core
@@ -96,8 +97,7 @@ graph TB
     VALID --> ENGINE
     PROFILER -->|Statistical Analysis| DATASETS
     MONITOR -->|Metrics from| PROFILER
-    MONITOR -->|Check Threshold
-    PROFILER -->|Statistical Analysis| DATASETS
+    MONITOR -->|Check Thresholds| DATASETS
     
     %% Core processing
     SCHEMA --> SCHEMAS
@@ -109,13 +109,17 @@ graph TB
     VALID -.->|API Calls| GPT4
     ORCH -.->|Chat| GPT4
     
-    MONITOR -->|Alerts| REPORTGEN
     %% Data flow
     PROFILER --> BASELINE
     PROFILER -->|Anomalies| REPORTGEN
+    MONITOR -->|Alerts| REPORTGEN
     ENGINE -->|Results| REPORTGEN
     REPORTGEN --> REPORTS
     
+    %% Utilities usage
+    PROFILER --> LOGGER
+    TESTGEN --> LOGGER
+    VALID --> LOGGER
     MONITOR --> LOGGER
     ORCH --> DATAUTILS
     PROFILER --> DATAUTILS
@@ -128,18 +132,18 @@ graph TB
     classDef utilClass fill:#9E9E9E,stroke:#424242,color:#fff
     classDef extClass fill:#9C27B0,stroke:#6A1B9A,color:#fff
     
-    class TESTGEN,VALID,PROFILER,ORCH,MONITORtroke:#E65100,color:#fff
-    classDef utilClass fill:#9E9E9E,stroke:#424242,color:#fff
-    classDef extClass fill:#9C27B0,stroke:#6A1B9A,color:#fff
-    
-    class TESTGEN,VALID,PROFILER,ORCH agentClass
+    class TESTGEN,VALID,PROFILER,ORCH,MONITOR agentClass
     class SCHEMA,TESTCASE,ENGINE coreClass
     class DATASETS,SCHEMAS,REPORTS,BASELINE dataClass
     class LOGGER,DATAUTILS,REPORTGEN utilClass
     class GPT4 extClass
-```
+### Agentic Workflow
 
-### Agentic WorkMonitor as Monitoring Agent
+```mermaid
+sequenceDiagram
+    participant User
+    participant Orchestrator
+    participant Monitor as Monitoring Agent
     participant Profiler
     participant TestGen as Test Generator
     participant Validator
@@ -193,31 +197,8 @@ graph TB
     
     Orchestrator-->>User: Complete results + recommendations
     
-    Note├── orchestrator_agent.py      # Coordinates workflows
-│   │   └── monitoring_agent.py        # 🆕 Continuous monitoring & alerting
-│   ├── core/                      # Core testing engine
-│   │   ├── schema_analyzer.py         # Schema analysis & insights
-│   │   ├── test_case_generator.py     # Test data generation
-│   │   ├── validation_engine.py       # Validation execution
-│   │   └── data_profiler.py           # Data profiling & drift detection
-│   ├── utils/                     # Utilities
-│   │   ├── logger.py
-│   │   ├── data_utils.py
-│   │   └── report_generator.py
-│   └── config/                    # Configuration
-│       └── settings.py
-├── examples/                      # Example data & demos
-│   ├── sample_datasets/
-│   ├── sample_schemas/
-│   └── demo_pipelines/
-│       ├── chat_demo.py
-│       ├── financial_validation_demo.py
-│       └── monitoring_demo.py         # 🆕 Monitoring simulationtor_agent.py    # Generates test cases
-│   │   ├── validation_agent.py        # Validates data & pipelines
-│   │   └── orchestrator_agent.py      # Coordinates workflows
-│   ├── core/                      # Core testing engine
-│   │   ├── schema_analyzer.py         # Schema analysis & insights
-│   │   ├── test_case_generator.py     # Test data generation
+    Note over User: Review findings:<br/>- Anomalies detected<br/>- Data quality issues<br/>- Validation status<br/>- Monitoring alerts<br/>- Recommendations
+```
 │   │   ├── validation_engine.py       # Validation execution
 │   │   └── data_profiler.py           # 🆕 Data profiling & drift detection
 │   ├── utils/                     # Utilities
