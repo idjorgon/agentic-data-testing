@@ -5,6 +5,7 @@ Agents package initialization
 from .test_generator_agent import TestGeneratorAgent, TestCase, TestSuite
 from .validation_agent import ValidationAgent, ValidationResult, PipelineValidationReport
 from .orchestrator_agent import OrchestratorAgent
+from .monitoring_agent import MonitoringAgent, Alert, MetricSnapshot
 
 __all__ = [
     'TestGeneratorAgent',
@@ -13,5 +14,8 @@ __all__ = [
     'ValidationAgent',
     'ValidationResult',
     'PipelineValidationReport',
-    'OrchestratorAgent'
+    'OrchestratorAgent',
+    'MonitoringAgent',
+    'Alert',
+    'MetricSnapshot'
 ]

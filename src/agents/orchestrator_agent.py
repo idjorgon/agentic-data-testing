@@ -14,6 +14,7 @@ from langchain_core.prompts import ChatPromptTemplate
 
 from .test_generator_agent import TestGeneratorAgent, TestSuite
 from .validation_agent import ValidationAgent, PipelineValidationReport
+from .monitoring_agent import MonitoringAgent
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +53,7 @@ class OrchestratorAgent:
         """
         self.llm = ChatOpenAI(model_name=model_name, temperature=temperature)
         self.test_generator = TestGeneratorAgent(model_name=model_name)
+        self.monitor = MonitoringAgent()  # Initialize monitoring agent
         self.validator = ValidationAgent(model_name=model_name)
         self.conversation_history = []
         
@@ -460,3 +462,57 @@ class OrchestratorAgent:
             "conversation_summary": self.conversation_history[-10:],  # Last 10 messages
             "timestamp": datetime.now().isoformat()
         }
+    
+    def get_monitoring_report(self) -> Dict[str, Any]:
+        """
+        Get comprehensive monitoring report from the monitoring agent
+        
+        Returns:
+            Monitoring report with metrics, trends, and alerts
+        """
+        return self.monitor.generate_monitoring_report()
+    
+    def track_and_monitor(
+        self,
+        profile_result: Any,
+        dataset_name: str
+    ) -> Dict[str, Any]:
+        """
+        Track profiling metrics and check for alerts
+        
+        Args:
+            profile_result: DatasetProfile from DataProfiler
+            dataset_name: Name of the dataset
+        
+        Returns:
+            Dictionary with metrics and any triggered alerts
+        """
+        try:
+            # Track metrics
+            metrics = self.monitor.track_profiling_metrics(profile_result, dataset_name)
+            
+            # Check thresholds
+            alerts = self.monitor.check_thresholds(metrics)
+            
+            return {
+                "status": "success",
+                "dataset": dataset_name,
+                "metrics_tracked": len(metrics),
+                "alerts_triggered": len(alerts),
+                "alerts": [
+                    {
+                        "severity": alert.severity,
+                        "metric": alert.metric_name,
+                        "message": alert.message,
+                        "recommendations": alert.recommendations
+                    }
+                    for alert in alerts
+                ]
+            }
+        except Exception as e:
+            logger.error(f"Error in track_and_monitor: {str(e)}", exc_info=True)
+            return {
+                "status": "error",
+                "message": str(e)
+            }
+

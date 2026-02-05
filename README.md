@@ -53,6 +53,7 @@ graph TB
         TESTGEN[🤖 Test Generator Agent<br/>- Analyze schemas<br/>- Generate test cases<br/>- Create synthetic data]
         VALID[✅ Validation Agent<br/>- Schema compliance<br/>- Business rules<br/>- Regression testing]
         PROFILER[📊 Data Profiler<br/>- Column profiling<br/>- Anomaly detection<br/>- Drift detection]
+        MONITOR[📈 Monitoring Agent<br/>- Track metrics<br/>- Threshold alerts<br/>- Trend analysis]
     end
     
     subgraph "Core Processing Layer"
@@ -87,12 +88,15 @@ graph TB
     %% Orchestrator coordinates agents
     ORCH -->|Plan & Execute| TESTGEN
     ORCH -->|Validate| VALID
-    ORCH -->|Profile First| PROFILER
+    ORCH -->|Track & Alert| MONITOR
     
     %% Agent interactions with core
     TESTGEN --> SCHEMA
     TESTGEN --> TESTCASE
     VALID --> ENGINE
+    PROFILER -->|Statistical Analysis| DATASETS
+    MONITOR -->|Metrics from| PROFILER
+    MONITOR -->|Check Threshold
     PROFILER -->|Statistical Analysis| DATASETS
     
     %% Core processing
@@ -105,23 +109,26 @@ graph TB
     VALID -.->|API Calls| GPT4
     ORCH -.->|Chat| GPT4
     
+    MONITOR -->|Alerts| REPORTGEN
     %% Data flow
     PROFILER --> BASELINE
     PROFILER -->|Anomalies| REPORTGEN
     ENGINE -->|Results| REPORTGEN
     REPORTGEN --> REPORTS
     
-    %% Utilities usage
-    PROFILER --> LOGGER
-    TESTGEN --> LOGGER
-    VALID --> LOGGER
+    MONITOR --> LOGGER
     ORCH --> DATAUTILS
     PROFILER --> DATAUTILS
+    MONITOR --> DATAUTILS
     
     %% Styling
     classDef agentClass fill:#4CAF50,stroke:#2E7D32,color:#fff
     classDef coreClass fill:#2196F3,stroke:#1565C0,color:#fff
     classDef dataClass fill:#FF9800,stroke:#E65100,color:#fff
+    classDef utilClass fill:#9E9E9E,stroke:#424242,color:#fff
+    classDef extClass fill:#9C27B0,stroke:#6A1B9A,color:#fff
+    
+    class TESTGEN,VALID,PROFILER,ORCH,MONITORtroke:#E65100,color:#fff
     classDef utilClass fill:#9E9E9E,stroke:#424242,color:#fff
     classDef extClass fill:#9C27B0,stroke:#6A1B9A,color:#fff
     
@@ -132,12 +139,7 @@ graph TB
     class GPT4 extClass
 ```
 
-### Agentic Workflow
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant Orchestrator
+### Agentic WorkMonitor as Monitoring Agent
     participant Profiler
     participant TestGen as Test Generator
     participant Validator
@@ -152,6 +154,18 @@ sequenceDiagram
     Profiler->>Profiler: Detect anomalies (IQR/Z-score)
     Profiler->>Profiler: Check for drift vs baseline
     Profiler-->>Orchestrator: Profile results + anomalies
+    
+    Note over Orchestrator: Step 1b: Continuous Monitoring
+    Orchestrator->>Monitor: Track profiling metrics
+    Monitor->>Monitor: Record metric snapshots
+    Monitor->>Monitor: Check thresholds
+    Monitor->>Monitor: Detect trends
+    Monitor-->>Orchestrator: Alerts (if any)
+    
+    alt Critical Alerts Triggered
+        Monitor-->>User: 🚨 Alert notifications
+        Note over User: Review alerts:<br/>- High null percentages<br/>- Anomaly spikes<br/>- Data drift detected
+    end
     
     Note over Orchestrator: Step 2: Test Generation (Optional)
     Orchestrator->>TestGen: Analyze schema
@@ -174,20 +188,31 @@ sequenceDiagram
     Reports->>Reports: Create HTML report
     Reports->>Reports: Create Markdown report
     Reports->>Reports: Create JSON report
+    Monitor->>Reports: Include monitoring metrics
     Reports-->>Orchestrator: Report files
     
     Orchestrator-->>User: Complete results + recommendations
     
-    Note over User: Review findings:<br/>- Anomalies detected<br/>- Data quality issues<br/>- Validation status<br/>- Recommendations
-```
-
-### Project Structure
-
-```
-agentic-data-testing/
-├── src/
-│   ├── agents/                    # AI Agent implementations
-│   │   ├── test_generator_agent.py    # Generates test cases
+    Note├── orchestrator_agent.py      # Coordinates workflows
+│   │   └── monitoring_agent.py        # 🆕 Continuous monitoring & alerting
+│   ├── core/                      # Core testing engine
+│   │   ├── schema_analyzer.py         # Schema analysis & insights
+│   │   ├── test_case_generator.py     # Test data generation
+│   │   ├── validation_engine.py       # Validation execution
+│   │   └── data_profiler.py           # Data profiling & drift detection
+│   ├── utils/                     # Utilities
+│   │   ├── logger.py
+│   │   ├── data_utils.py
+│   │   └── report_generator.py
+│   └── config/                    # Configuration
+│       └── settings.py
+├── examples/                      # Example data & demos
+│   ├── sample_datasets/
+│   ├── sample_schemas/
+│   └── demo_pipelines/
+│       ├── chat_demo.py
+│       ├── financial_validation_demo.py
+│       └── monitoring_demo.py         # 🆕 Monitoring simulationtor_agent.py    # Generates test cases
 │   │   ├── validation_agent.py        # Validates data & pipelines
 │   │   └── orchestrator_agent.py      # Coordinates workflows
 │   ├── core/                      # Core testing engine
@@ -247,11 +272,14 @@ export OPENAI_API_KEY="your-api-key-here"
 ### Run Your First Demo
 
 ```bash
-# Run the financial validation demo
+# Run the financial validation demo (with profiling & mocked validation)
 python examples/demo_pipelines/financial_validation_demo.py
 
 # Try the interactive chat interface
 python examples/demo_pipelines/chat_demo.py --mode interactive
+
+# 🆕 Run monitoring simulation (NO API calls - pure analytics!)
+python examples/demo_pipelines/monitoring_demo.py
 ```
 
 ---
@@ -355,6 +383,61 @@ interpretation = orchestrator.interpret_results(results)
 - Multi-agent coordination
 - Results interpretation
 - Test improvement suggestions
+- Continuous monitoring integration
+
+### 4. Monitoring Agent 🆕
+
+Tracks data quality metrics over time with automated alerting (NO API calls required).
+
+```python
+from agents import MonitoringAgent
+from core import DataProfiler
+
+# Initialize monitoring
+monitor = MonitoringAgent(alert_config={
+    "null_percentage_threshold": 10.0,
+    "anomaly_count_threshold": 5,
+    "alert_channels": ["log", "slack"]
+})
+
+# Profile dataset
+profiler = DataProfiler()
+profile = profiler.profile_dataset(data, "transactions")
+
+# Track metrics
+metrics = monitor.track_profiling_metrics(profile, "transactions")
+
+# Check for alerts
+alerts = monitor.check_thresholds(metrics)
+
+if alerts:
+    for alert in alerts:
+        print(f"⚠️ {alert.severity}: {alert.message}")
+        for rec in alert.recommendations:
+            print(f"  • {rec}")
+
+# Generate monitoring report
+report = monitor.generate_monitoring_report()
+print(f"Tracking {report['metrics_tracked']} metrics")
+print(f"Active alerts: {report['active_alerts']}")
+```
+
+**Capabilities:**
+- Metric tracking over time (in-memory & exportable)
+- Threshold-based alerting (null %, anomalies, drift)
+- Trend detection (increasing/decreasing/stable)
+- Rate limiting (prevent alert fatigue)
+- Historical analysis with volatility metrics
+- Secure: Input validation, memory limits, sanitization
+- NO OpenAI API required - pure Python analytics
+
+**Security Features:**
+- Input validation and sanitization
+- Memory limits (10K metrics, 1K alerts)
+- Path validation for file operations
+- Rate limiting for alerts (prevent spam)
+- Metric name sanitization
+- Safe value checks (no NaN/Infinity)
 
 ---
 
@@ -420,7 +503,47 @@ for question in questions:
     print(f"A: {response}\n")
 ```
 
-### Example 4: Generate Test Reports
+### Example 4: Continuous Monitoring (No API!) 🆕
+
+```python
+from agents import MonitoringAgent
+from core import DataProfiler
+from utils import load_json
+
+# Initialize
+profiler = DataProfiler()
+monitor = MonitoringAgent(alert_config={
+    "null_percentage_threshold": 10.0,
+    "anomaly_count_threshold": 5
+})
+
+# Simulate daily monitoring
+for day in range(1, 8):
+    # Load daily data
+    data = load_json(f"data/daily/day_{day}.json")
+    
+    # Profile
+    profile = profiler.profile_dataset(data, "transactions")
+    
+    # Track & alert
+    metrics = monitor.track_profiling_metrics(profile, "transactions")
+    alerts = monitor.check_thresholds(metrics)
+    
+    if alerts:
+        print(f"Day {day}: {len(alerts)} alerts")
+        for alert in alerts:
+            print(f"  {alert.severity}: {alert.message}")
+
+# Trend analysis
+trend = monitor.detect_trends("transactions_amount_null_pct")
+print(f"Null % trend: {trend['direction']}")
+print(f"Rate of change: {trend['rate_of_change']:.2f}")
+
+# Export metrics for dashboarding
+monitor.export_metrics("monitoring_history.json")
+```
+
+### Example 5: Generate Test Reports
 
 ```python
 from utils import ReportGenerator
